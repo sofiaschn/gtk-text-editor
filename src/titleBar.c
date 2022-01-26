@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 
-static void onFileChooserResponse(GtkNativeDialog *fileChooser, int response,
-                                  char *text) {
+static void onFileChooserResponseSave(GtkNativeDialog *fileChooser,
+                                      int response, char *text) {
     if (response == GTK_RESPONSE_ACCEPT) {
         GFile *chosenFile =
             gtk_file_chooser_get_file(GTK_FILE_CHOOSER(fileChooser));
@@ -10,6 +10,32 @@ static void onFileChooserResponse(GtkNativeDialog *fileChooser, int response,
                                 G_FILE_CREATE_NONE, NULL, NULL, NULL);
 
         g_object_unref(chosenFile);
+    }
+
+    g_object_unref(fileChooser);
+}
+
+static void onFileChooserResponseOpen(GtkNativeDialog *fileChooser,
+                                      int response, GtkWidget *window) {
+    if (response == GTK_RESPONSE_ACCEPT) {
+        GFile *chosenFile =
+            gtk_file_chooser_get_file(GTK_FILE_CHOOSER(fileChooser));
+
+        // TODO: cycle through all widgets and find the GtkTextView.
+        GtkWidget *textView = gtk_widget_get_first_child(window);
+        GtkTextBuffer *textBuffer =
+            gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
+
+        char *content;
+        gsize contentLength;
+
+        g_file_load_contents(chosenFile, NULL, &content, &contentLength, NULL,
+                             NULL);
+
+        gtk_text_buffer_set_text(textBuffer, content, contentLength);
+
+        g_object_unref(chosenFile);
+        g_free(content);
     }
 
     g_object_unref(fileChooser);
@@ -33,8 +59,19 @@ static void saveButtonClicked(GtkWidget *saveButton, GtkWidget *window) {
     gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(fileChooser),
                                       "Untitled Document");
 
-    g_signal_connect(fileChooser, "response", G_CALLBACK(onFileChooserResponse),
-                     text);
+    g_signal_connect(fileChooser, "response",
+                     G_CALLBACK(onFileChooserResponseSave), text);
+
+    gtk_native_dialog_show(GTK_NATIVE_DIALOG(fileChooser));
+}
+
+static void openButtonClicked(GtkWidget *saveButton, GtkWidget *window) {
+    GtkFileChooserNative *fileChooser = gtk_file_chooser_native_new(
+        "Open File", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN, "Open",
+        "Cancel");
+
+    g_signal_connect(fileChooser, "response",
+                     G_CALLBACK(onFileChooserResponseOpen), window);
 
     gtk_native_dialog_show(GTK_NATIVE_DIALOG(fileChooser));
 }
@@ -46,6 +83,12 @@ void buildTitleBar(GtkWidget *window) {
                      window);
 
     gtk_header_bar_pack_start(GTK_HEADER_BAR(headerBar), saveButton);
+
+    GtkWidget *openButton = gtk_button_new_with_label("Open");
+    g_signal_connect(openButton, "clicked", G_CALLBACK(openButtonClicked),
+                     window);
+
+    gtk_header_bar_pack_start(GTK_HEADER_BAR(headerBar), openButton);
 
     gtk_window_set_titlebar(GTK_WINDOW(window), headerBar);
 }
