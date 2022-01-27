@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include "textView.h"
 
 static void onFileChooserResponse(GtkNativeDialog *fileChooser,
                                       int response, gpointer data) {
@@ -13,8 +14,6 @@ static void onFileChooserResponse(GtkNativeDialog *fileChooser,
             g_file_replace_contents(chosenFile, data, strlen(data), NULL, FALSE,
                                     G_FILE_CREATE_NONE, NULL, NULL, NULL);
         } else if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
-            // TODO: cycle through all widgets and find the GtkTextView.
-            GtkWidget *textView = gtk_widget_get_first_child(data);
             GtkTextBuffer *textBuffer =
                 gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
 
@@ -36,8 +35,6 @@ static void onFileChooserResponse(GtkNativeDialog *fileChooser,
 }
 
 static void saveButtonClicked(GtkWidget *saveButton, GtkWidget *window) {
-    // TODO: cycle through all widgets and find the GtkTextView.
-    GtkWidget *textView = gtk_widget_get_first_child(window);
     GtkTextBuffer *textBuffer =
         gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
 
