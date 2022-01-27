@@ -1,5 +1,7 @@
 #include <gtk/gtk.h>
 
-extern GtkWidget *textView;
-
 void buildTextView(GtkWidget *window);
+
+void saveFile(GFile *file);
+
+void openFile(GFile *file);
