@@ -26,19 +26,26 @@ static void onFileChooserResponse(GtkNativeDialog *fileChooser, int response,
     g_object_unref(fileChooser);
 }
 
-static void saveButtonClicked(GtkWidget *saveButton, GtkWidget *window) {
+static void saveButtonClicked(gpointer *action, GtkWidget *window) {
+    char *name = "Untitled Document";
     if (OPEN_FILE_PATH[0]) {
-        saveFile(g_file_new_for_path(OPEN_FILE_PATH));
+        GFile *file = g_file_new_for_path(OPEN_FILE_PATH);
 
-        return;
+        //  TODO: Check if the button is the save button
+        if (GTK_IS_BUTTON(action)) {
+            saveFile(file);
+            g_object_unref(file);
+            return;
+        }
+
+        name = g_file_get_basename(file);
     }
 
     GtkFileChooserNative *fileChooser = gtk_file_chooser_native_new(
         "Save File", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, "Save",
         "Cancel");
 
-    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(fileChooser),
-                                      "Untitled Document");
+    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(fileChooser), name);
 
     g_signal_connect(fileChooser, "response", G_CALLBACK(onFileChooserResponse),
                      window);
@@ -46,7 +53,7 @@ static void saveButtonClicked(GtkWidget *saveButton, GtkWidget *window) {
     gtk_native_dialog_show(GTK_NATIVE_DIALOG(fileChooser));
 }
 
-static void openButtonClicked(GtkWidget *saveButton, GtkWidget *window) {
+static void openButtonClicked(gpointer *action, GtkWidget *window) {
     GtkFileChooserNative *fileChooser = gtk_file_chooser_native_new(
         "Open File", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN, "Open",
         "Cancel");
@@ -63,11 +70,22 @@ void buildTitleBar(GtkWidget *window) {
     g_signal_connect(saveButton, "clicked", G_CALLBACK(saveButtonClicked),
                      window);
 
-    GtkWidget *saveMenu = gtk_menu_button_new();
+    GtkWidget *saveMenuButton = gtk_menu_button_new();
+
+    GMenu *saveMenu = g_menu_new();
+    g_menu_append(saveMenu, "Save As", "win.saveAs");
+    GSimpleAction *action = g_simple_action_new("saveAs", NULL);
+    g_signal_connect(action, "activate", G_CALLBACK(saveButtonClicked), window);
+    g_action_map_add_action(G_ACTION_MAP(window), (GAction *)action);
+
+    GtkWidget *saveMenuPopover =
+        gtk_popover_menu_new_from_model((GMenuModel *)saveMenu);
+    gtk_menu_button_set_popover(GTK_MENU_BUTTON(saveMenuButton),
+                                saveMenuPopover);
 
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_prepend(GTK_BOX(box), saveButton);
-    gtk_box_append(GTK_BOX(box), saveMenu);
+    gtk_box_append(GTK_BOX(box), saveMenuButton);
 
     GtkStyleContext *context = gtk_widget_get_style_context(box);
     gtk_style_context_add_class(context, "linked");
