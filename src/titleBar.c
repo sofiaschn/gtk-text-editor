@@ -1,5 +1,5 @@
-#include <gtk/gtk.h>
 #include "textView.h"
+#include <gtk/gtk.h>
 
 char *OPEN_FILE_PATH = "";
 
@@ -29,7 +29,7 @@ static void onFileChooserResponse(GtkNativeDialog *fileChooser, int response,
 static void saveButtonClicked(GtkWidget *saveButton, GtkWidget *window) {
     if (OPEN_FILE_PATH[0]) {
         saveFile(g_file_new_for_path(OPEN_FILE_PATH));
-        
+
         return;
     }
 
@@ -63,7 +63,16 @@ void buildTitleBar(GtkWidget *window) {
     g_signal_connect(saveButton, "clicked", G_CALLBACK(saveButtonClicked),
                      window);
 
-    gtk_header_bar_pack_start(GTK_HEADER_BAR(headerBar), saveButton);
+    GtkWidget *saveMenu = gtk_menu_button_new();
+
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_box_prepend(GTK_BOX(box), saveButton);
+    gtk_box_append(GTK_BOX(box), saveMenu);
+
+    GtkStyleContext *context = gtk_widget_get_style_context(box);
+    gtk_style_context_add_class(context, "linked");
+
+    gtk_header_bar_pack_start(GTK_HEADER_BAR(headerBar), box);
 
     GtkWidget *openButton = gtk_button_new_with_label("Open");
     g_signal_connect(openButton, "clicked", G_CALLBACK(openButtonClicked),
