@@ -1,41 +1,35 @@
 #include <gtk/gtk.h>
 
-static void onFileChooserResponseSave(GtkNativeDialog *fileChooser,
-                                      int response, char *text) {
+static void onFileChooserResponse(GtkNativeDialog *fileChooser,
+                                      int response, gpointer data) {
+    GtkFileChooserAction action =
+        gtk_file_chooser_get_action(GTK_FILE_CHOOSER(fileChooser));
+
     if (response == GTK_RESPONSE_ACCEPT) {
         GFile *chosenFile =
             gtk_file_chooser_get_file(GTK_FILE_CHOOSER(fileChooser));
 
-        g_file_replace_contents(chosenFile, text, strlen(text), NULL, FALSE,
-                                G_FILE_CREATE_NONE, NULL, NULL, NULL);
+        if (action == GTK_FILE_CHOOSER_ACTION_SAVE) {
+            g_file_replace_contents(chosenFile, data, strlen(data), NULL, FALSE,
+                                    G_FILE_CREATE_NONE, NULL, NULL, NULL);
+        } else if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
+            // TODO: cycle through all widgets and find the GtkTextView.
+            GtkWidget *textView = gtk_widget_get_first_child(data);
+            GtkTextBuffer *textBuffer =
+                gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
+
+            char *content;
+            gsize contentLength;
+
+            g_file_load_contents(chosenFile, NULL, &content, &contentLength,
+                                 NULL, NULL);
+
+            gtk_text_buffer_set_text(textBuffer, content, contentLength);
+
+            g_free(content);
+        }
 
         g_object_unref(chosenFile);
-    }
-
-    g_object_unref(fileChooser);
-}
-
-static void onFileChooserResponseOpen(GtkNativeDialog *fileChooser,
-                                      int response, GtkWidget *window) {
-    if (response == GTK_RESPONSE_ACCEPT) {
-        GFile *chosenFile =
-            gtk_file_chooser_get_file(GTK_FILE_CHOOSER(fileChooser));
-
-        // TODO: cycle through all widgets and find the GtkTextView.
-        GtkWidget *textView = gtk_widget_get_first_child(window);
-        GtkTextBuffer *textBuffer =
-            gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
-
-        char *content;
-        gsize contentLength;
-
-        g_file_load_contents(chosenFile, NULL, &content, &contentLength, NULL,
-                             NULL);
-
-        gtk_text_buffer_set_text(textBuffer, content, contentLength);
-
-        g_object_unref(chosenFile);
-        g_free(content);
     }
 
     g_object_unref(fileChooser);
@@ -60,7 +54,7 @@ static void saveButtonClicked(GtkWidget *saveButton, GtkWidget *window) {
                                       "Untitled Document");
 
     g_signal_connect(fileChooser, "response",
-                     G_CALLBACK(onFileChooserResponseSave), text);
+                     G_CALLBACK(onFileChooserResponse), text);
 
     gtk_native_dialog_show(GTK_NATIVE_DIALOG(fileChooser));
 }
@@ -71,7 +65,7 @@ static void openButtonClicked(GtkWidget *saveButton, GtkWidget *window) {
         "Cancel");
 
     g_signal_connect(fileChooser, "response",
-                     G_CALLBACK(onFileChooserResponseOpen), window);
+                     G_CALLBACK(onFileChooserResponse), window);
 
     gtk_native_dialog_show(GTK_NATIVE_DIALOG(fileChooser));
 }
