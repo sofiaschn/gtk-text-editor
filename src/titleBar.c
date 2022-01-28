@@ -98,8 +98,7 @@ void buildTitleBar(GtkWidget *window) {
     gtk_box_prepend(GTK_BOX(box), saveButton);
     gtk_box_append(GTK_BOX(box), saveMenuButton);
 
-    GtkStyleContext *context = gtk_widget_get_style_context(box);
-    gtk_style_context_add_class(context, "linked");
+    gtk_widget_add_css_class(box, "linked");
 
     gtk_header_bar_pack_start(GTK_HEADER_BAR(headerBar), box);
 

@@ -32,6 +32,11 @@ void buildTextView(GtkWidget *window) {
     GtkWidget *textView = gtk_text_view_new();
     textBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
 
+    gtk_text_view_set_left_margin(GTK_TEXT_VIEW(textView), 2);
+    gtk_text_view_set_right_margin(GTK_TEXT_VIEW(textView), 2);
+    gtk_text_view_set_top_margin(GTK_TEXT_VIEW(textView), 2);
+    gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(textView), 2);
+
     g_signal_connect(textBuffer, "changed", G_CALLBACK(onTextChange), NULL);
 
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolledWindow),

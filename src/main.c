@@ -29,8 +29,7 @@ static void onClose(GtkWidget *window) {
     GtkWidget *closeButton = gtk_dialog_add_button(
         GTK_DIALOG(dialog), "Close without saving", GTK_RESPONSE_CLOSE);
 
-    GtkStyleContext *context = gtk_widget_get_style_context(closeButton);
-    gtk_style_context_add_class(context, "destructive-action");
+    gtk_widget_add_css_class(closeButton, "destructive-action");
 
     gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
                                              "Do you want to save them?");
