@@ -2,6 +2,6 @@
 
 void buildTextView(GtkWidget *window);
 
-void saveFile(GFile *file);
+void textBufferToFile(GFile *file);
 
-void openFile(GFile *file);
+void fileToTextBuffer(GFile *file);

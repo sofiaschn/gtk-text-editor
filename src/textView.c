@@ -13,7 +13,7 @@ void buildTextView(GtkWidget *window) {
     gtk_window_set_child(GTK_WINDOW(window), scrolledWindow);
 }
 
-void saveFile(GFile *file) {
+void textBufferToFile(GFile *file) {
     GtkTextIter start, end;
     gtk_text_buffer_get_bounds(textBuffer, &start, &end);
 
@@ -23,7 +23,7 @@ void saveFile(GFile *file) {
                             G_FILE_CREATE_NONE, NULL, NULL, NULL);
 }
 
-void openFile(GFile *file) {
+void fileToTextBuffer(GFile *file) {
     char *content;
     gsize contentLength;
 
