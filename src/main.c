@@ -16,6 +16,12 @@ static void onDialogReponse(GtkWidget *dialog, int response) {
 }
 
 static void onClose(GtkWidget *window) {
+    if (!EDITED) {
+        gtk_window_destroy(GTK_WINDOW(window));
+
+        return;
+    }
+
     GtkWidget *dialog = gtk_message_dialog_new(
         GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING,
         GTK_BUTTONS_NONE, "You have changes that have not been saved.");
@@ -39,7 +45,7 @@ static void onClose(GtkWidget *window) {
 
 static void onActive(GtkApplication *app) {
     GtkWidget *window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window), "Text Editor");
+    gtk_window_set_title(GTK_WINDOW(window), "Untitled Document");
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
 
     buildTextView(window);

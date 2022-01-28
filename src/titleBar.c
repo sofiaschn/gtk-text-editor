@@ -16,6 +16,7 @@ static void onFileChooserResponse(GtkNativeDialog *fileChooser, int response,
         } else if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
             fileToTextBuffer(file);
         }
+        EDITED = FALSE;
         gtk_window_set_title(GTK_WINDOW(window), g_file_get_basename(file));
 
         OPEN_FILE_PATH = g_file_get_path(file);
@@ -33,14 +34,16 @@ void saveAction(gpointer *action, bool saveAs) {
     char *name = "Untitled Document";
     if (OPEN_FILE_PATH[0]) {
         GFile *file = g_file_new_for_path(OPEN_FILE_PATH);
-
+        name = g_file_get_basename(file);
         if (!saveAs) {
             textBufferToFile(file);
+
+            EDITED = false;
+            gtk_window_set_title(GTK_WINDOW(window), name);
+
             g_object_unref(file);
             return;
         }
-
-        name = g_file_get_basename(file);
     }
 
     GtkFileChooserNative *fileChooser = gtk_file_chooser_native_new(
@@ -54,6 +57,10 @@ void saveAction(gpointer *action, bool saveAs) {
 
     gtk_native_dialog_show(GTK_NATIVE_DIALOG(fileChooser));
 }
+
+//  This function is needed since I couldn't work out how to pass the boolean
+//  through the g_signal_connect data parameter.
+static void saveAs(gpointer *action) { saveAction(action, TRUE); }
 
 void openAction(gpointer *action) {
     GListModel *topLevels = gtk_window_get_toplevels();
@@ -72,15 +79,14 @@ void openAction(gpointer *action) {
 void buildTitleBar(GtkWidget *window) {
     GtkWidget *headerBar = gtk_header_bar_new();
     GtkWidget *saveButton = gtk_button_new_with_label("Save");
-    g_signal_connect(saveButton, "clicked", G_CALLBACK(saveAction), FALSE);
+    g_signal_connect(saveButton, "clicked", G_CALLBACK(saveAction), NULL);
 
     GtkWidget *saveMenuButton = gtk_menu_button_new();
 
     GMenu *saveMenu = g_menu_new();
     g_menu_append(saveMenu, "Save As", "win.saveAs");
     GSimpleAction *action = g_simple_action_new("saveAs", NULL);
-    g_signal_connect(action, "activate", G_CALLBACK(saveAction),
-                     (gpointer *)TRUE);
+    g_signal_connect(action, "activate", G_CALLBACK(saveAs), NULL);
     g_action_map_add_action(G_ACTION_MAP(window), (GAction *)action);
 
     GtkWidget *saveMenuPopover =
