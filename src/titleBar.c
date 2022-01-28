@@ -49,6 +49,10 @@ void saveAction(gpointer *action, bool saveAs) {
     GtkFileChooserNative *fileChooser = gtk_file_chooser_native_new(
         "Save File", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, "Save",
         "Cancel");
+    
+    GtkFileFilter *fileFilter = gtk_file_filter_new();
+    gtk_file_filter_add_mime_type(fileFilter, "text/*");
+    gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(fileChooser), fileFilter);
 
     gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(fileChooser), name);
 
@@ -69,6 +73,10 @@ void openAction(gpointer *action) {
     GtkFileChooserNative *fileChooser = gtk_file_chooser_native_new(
         "Open File", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN, "Open",
         "Cancel");
+    
+    GtkFileFilter *fileFilter = gtk_file_filter_new();
+    gtk_file_filter_add_mime_type(fileFilter, "text/*");
+    gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(fileChooser), fileFilter);
 
     g_signal_connect(fileChooser, "response", G_CALLBACK(onFileChooserResponse),
                      window);
