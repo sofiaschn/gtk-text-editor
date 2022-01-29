@@ -86,7 +86,7 @@ void openAction(gpointer *action) {
 
 void buildTitleBar(GtkWidget *window) {
     GtkWidget *headerBar = gtk_header_bar_new();
-    GtkWidget *saveButton = gtk_button_new_with_label("Save");
+    GtkWidget *saveButton = gtk_button_new_with_mnemonic("_Save");
     g_signal_connect(saveButton, "clicked", G_CALLBACK(saveAction), NULL);
 
     GtkWidget *saveMenuButton = gtk_menu_button_new();
@@ -110,7 +110,7 @@ void buildTitleBar(GtkWidget *window) {
 
     gtk_header_bar_pack_start(GTK_HEADER_BAR(headerBar), box);
 
-    GtkWidget *openButton = gtk_button_new_with_label("Open");
+    GtkWidget *openButton = gtk_button_new_with_mnemonic("_Open");
     g_signal_connect(openButton, "clicked", G_CALLBACK(openAction), NULL);
 
     gtk_header_bar_pack_start(GTK_HEADER_BAR(headerBar), openButton);

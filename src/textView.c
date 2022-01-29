@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 GtkTextBuffer *textBuffer;
@@ -18,13 +19,10 @@ static void onTextChange(GtkWidget *textBuffer) {
     const char *title = gtk_window_get_title(GTK_WINDOW(window));
     size_t titleLength = strlen(title);
 
-    char *newTitle = malloc(titleLength + 3); // 2 chars for "* " and 1 for /0
-    strcpy(newTitle + 2, title);              // Offset by the 2 chars ("* ")
-    newTitle[0] = '*', newTitle[1] = ' ';
+    char newTitle[titleLength + 2];
+    sprintf(newTitle, "* %s", title);
 
     gtk_window_set_title(GTK_WINDOW(window), newTitle);
-
-    free(newTitle);
 }
 
 void buildTextView(GtkWidget *window) {
