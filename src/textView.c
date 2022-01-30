@@ -1,20 +1,14 @@
 #include <gtk/gtk.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 
 GtkTextBuffer *textBuffer;
 bool EDITED = FALSE;
 
-static void onTextChange(GtkWidget *textBuffer) {
+static void onTextChange(GtkWidget *textBuffer, GtkWidget *window) {
     if (EDITED) {
         return;
     }
 
     EDITED = TRUE;
-
-    GListModel *topLevels = gtk_window_get_toplevels();
-    GtkWidget *window = g_list_model_get_item(topLevels, 0);
 
     const char *title = gtk_window_get_title(GTK_WINDOW(window));
     size_t titleLength = strlen(title);
@@ -35,7 +29,7 @@ void buildTextView(GtkWidget *window) {
     gtk_text_view_set_top_margin(GTK_TEXT_VIEW(textView), 2);
     gtk_text_view_set_bottom_margin(GTK_TEXT_VIEW(textView), 2);
 
-    g_signal_connect(textBuffer, "changed", G_CALLBACK(onTextChange), NULL);
+    g_signal_connect(textBuffer, "changed", G_CALLBACK(onTextChange), window);
 
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolledWindow),
                                   textView);
