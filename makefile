@@ -1,9 +1,10 @@
 BINDIR := bin
 BUILDDIR := build
 SOURCEDIR := src
+INSTALLDIR := /usr/bin
 
-TARGET_NAME := GTKEditor
-TARGET := $(BINDIR)/$(TARGET_NAME)
+TARGETNAME := gtkeditor
+TARGET := $(BINDIR)/$(TARGETNAME)
 
 SRC := $(foreach x, $(SOURCEDIR), $(wildcard $(addprefix $(x)/*,.c*)))
 OBJ := $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(notdir $(basename $(SRC)))))
@@ -34,3 +35,7 @@ cleanbuild:
 .PHONY: clean
 clean:
 	rm -r $(BUILDDIR) $(BINDIR)
+
+.PHONY: install
+install:
+	install -m 755 $(TARGET) $(INSTALLDIR)
