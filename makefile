@@ -2,9 +2,15 @@ BINDIR := bin
 BUILDDIR := build
 SOURCEDIR := src
 INSTALLDIR := /usr/bin
+ASSETSDIR := $(SOURCEDIR)/assets
+ICONSDIR := /usr/share/pixmaps
 
 TARGETNAME := gtkeditor
 TARGET := $(BINDIR)/$(TARGETNAME)
+
+ICON := $(ASSETSDIR)/$(TARGETNAME).png
+
+DESKTOPFILE := /usr/share/applications/$(TARGETNAME).desktop
 
 SRC := $(foreach x, $(SOURCEDIR), $(wildcard $(addprefix $(x)/*,.c*)))
 OBJ := $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(notdir $(basename $(SRC)))))
@@ -38,4 +44,15 @@ clean:
 
 .PHONY: install
 install:
+	install -m 644 $(ICON) $(ICONSDIR)
+	echo "[Desktop Entry]" > $(DESKTOPFILE)
+	echo "Version=1.0" >> $(DESKTOPFILE)
+	echo "Name=GTKEditor" >> $(DESKTOPFILE)
+	echo "Comment=GTKEditor is a simple text editor based on Window's Notepad.exe." >> $(DESKTOPFILE)
+	echo "Exec=gtkeditor" >> $(DESKTOPFILE)
+	echo "Path=$(INSTALLDIR)/" >> $(DESKTOPFILE)
+	echo "Icon=$(ICONSDIR)/$(TARGETNAME).png" >> $(DESKTOPFILE)
+	echo "Terminal=false" >> $(DESKTOPFILE)
+	echo "Type=Application" >> $(DESKTOPFILE)
+	echo "Categories=Utility;Office;TextTools;TextEditor;GTK;" >> $(DESKTOPFILE)
 	install -m 755 $(TARGET) $(INSTALLDIR)
