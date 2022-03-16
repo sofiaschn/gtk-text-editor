@@ -1,7 +1,24 @@
+#include "closeDialog.h"
 #include "textView.h"
 #include "titleBar.h"
-#include "closeDialog.h"
+#include "fileChooser.h"
 #include <gtk/gtk.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+GFile *file;
+
+static int onOpen(GApplication *app, GFile **files, int fileCount) {
+    if (fileCount > 1) {
+        fprintf(stderr, "ERROR: Pass only one file as argument!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    file = files[0];
+    g_application_activate(app);
+
+    return EXIT_SUCCESS;
+}
 
 static void onClose(GtkWidget *window) {
     if (!EDITED) {
@@ -23,6 +40,11 @@ static void onActive(GtkApplication *app) {
     buildTextView(window);
     buildTitleBar(window);
 
+    if (file) {
+        fileToTextBuffer(file);
+        setActiveFile(window, file);
+    }
+
     gtk_window_present(GTK_WINDOW(window));
 
     g_signal_connect(window, "close-request", G_CALLBACK(onClose), NULL);
@@ -30,7 +52,8 @@ static void onActive(GtkApplication *app) {
 
 int main(int argc, char **argv) {
     GtkApplication *app =
-        gtk_application_new("com.gtk-text-editor", G_APPLICATION_FLAGS_NONE);
+        gtk_application_new("com.gtk-text-editor", G_APPLICATION_HANDLES_OPEN);
+    g_signal_connect(app, "open", G_CALLBACK(onOpen), NULL);
     g_signal_connect(app, "activate", G_CALLBACK(onActive), NULL);
 
     return g_application_run(G_APPLICATION(app), argc, argv);

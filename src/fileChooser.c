@@ -1,10 +1,21 @@
 #include "textView.h"
 #include <gtk/gtk.h>
 
-char *OPEN_FILE_PATH = "";
+char *OPEN_FILE_PATH;
+
+void setActiveFile(GtkWidget *window, GFile *file) {
+    EDITED = FALSE;
+    gtk_window_set_title(GTK_WINDOW(window), g_file_get_basename(file));
+
+    OPEN_FILE_PATH = g_file_get_path(file);
+    
+    // TODO: Find out why this line causes 'g_object_unref: assertion 'G_IS_OBJECT (object)' failed'
+    // when the file comes from the terminal.
+    g_object_unref(file);
+}
 
 static void onFileChooserResponse(GtkNativeDialog *fileChooser, int response,
-                           GtkWidget *window) {
+                                  GtkWidget *window) {
     GtkFileChooserAction action =
         gtk_file_chooser_get_action(GTK_FILE_CHOOSER(fileChooser));
 
@@ -16,12 +27,8 @@ static void onFileChooserResponse(GtkNativeDialog *fileChooser, int response,
         } else if (action == GTK_FILE_CHOOSER_ACTION_OPEN) {
             fileToTextBuffer(file);
         }
-        EDITED = FALSE;
-        gtk_window_set_title(GTK_WINDOW(window), g_file_get_basename(file));
 
-        OPEN_FILE_PATH = g_file_get_path(file);
-
-        g_object_unref(file);
+        setActiveFile(window, file);
     }
 
     g_object_unref(fileChooser);
