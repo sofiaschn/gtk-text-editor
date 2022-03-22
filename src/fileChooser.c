@@ -1,7 +1,7 @@
 #include "textView.h"
 #include <gtk/gtk.h>
 
-char *OPEN_FILE_PATH;
+char *OPEN_FILE_PATH = "";
 
 void setActiveFile(GtkWidget *window, GFile *file) {
     EDITED = FALSE;

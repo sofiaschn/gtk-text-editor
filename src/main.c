@@ -40,15 +40,18 @@ static void onActive(GtkApplication *app) {
     buildTextView(window);
     buildTitleBar(window);
 
-    int fileType = g_file_query_file_type(file, G_FILE_QUERY_INFO_NONE, NULL);
-    int invalidTypes =
-        G_FILE_TYPE_DIRECTORY | G_FILE_TYPE_MOUNTABLE | G_FILE_TYPE_SPECIAL;
+    if (file) {
+        int fileType =
+            g_file_query_file_type(file, G_FILE_QUERY_INFO_NONE, NULL);
+        int invalidTypes =
+            G_FILE_TYPE_DIRECTORY | G_FILE_TYPE_MOUNTABLE | G_FILE_TYPE_SPECIAL;
 
-    if (!(fileType & invalidTypes)) {
-        if (fileType != G_FILE_TYPE_UNKNOWN) {
-            fileToTextBuffer(file);
+        if (!(fileType & invalidTypes)) {
+            if (fileType != G_FILE_TYPE_UNKNOWN) {
+                fileToTextBuffer(file);
+            }
+            setActiveFile(window, file);
         }
-        setActiveFile(window, file);
     }
 
     gtk_window_present(GTK_WINDOW(window));
