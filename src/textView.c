@@ -3,6 +3,29 @@
 GtkTextBuffer *textBuffer;
 bool EDITED = FALSE;
 
+const char *UTF_16_BE_BOM = "\xFE\xFF";
+const char *UTF_16_LE_BOM = "\xFF\xFE";
+const char *UTF_32_BE_BOM = "\x00\x00\xFE\xFF";
+const char *UTF_32_LE_BOM = "\xFF\xFE\x00\x00";
+
+//  Tries to use BOM to detect encoding. If no match is found, defaults to
+//  ISO-8859-1
+char *getEncoding(const char *data, size_t size) {
+    if (size >= 4) {
+        if (memcmp(data, UTF_32_LE_BOM, 4) == 0)
+            return "UTF-32-LE";
+        if (memcmp(data, UTF_32_BE_BOM, 4) == 0)
+            return "UTF-32-BE";
+    }
+    if (size >= 2) {
+        if (memcmp(data, UTF_16_LE_BOM, 2) == 0)
+            return "UTF-16-LE";
+        if (memcmp(data, UTF_16_BE_BOM, 2) == 0)
+            return "UTF-16-BE";
+    }
+    return "ISO-8859-1";
+}
+
 static void onTextChange(GtkWidget *textBuffer, GtkWidget *window) {
     if (EDITED) {
         return;
@@ -48,12 +71,18 @@ void textBufferToFile(GFile *file) {
 }
 
 void fileToTextBuffer(GFile *file) {
-    char *content;
-    gsize contentLength;
+    char *text;
+    gsize len;
 
-    g_file_load_contents(file, NULL, &content, &contentLength, NULL, NULL);
+    g_file_load_contents(file, NULL, &text, &len, NULL, NULL);
 
-    gtk_text_buffer_set_text(textBuffer, content, contentLength);
+    if (!g_utf8_validate(text, len, NULL)) {
+        char *encoding = getEncoding(text, len);
 
-    g_free(content);
+        text = g_convert(text, len, "UTF-8", encoding, NULL, &len, NULL);
+    }
+
+    gtk_text_buffer_set_text(textBuffer, text, len);
+
+    g_free(text);
 }
