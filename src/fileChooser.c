@@ -8,9 +8,7 @@ void setActiveFile(GtkWidget *window, GFile *file) {
     gtk_window_set_title(GTK_WINDOW(window), g_file_get_basename(file));
 
     OPEN_FILE_PATH = g_file_get_path(file);
-    
-    // TODO: Find out why this line causes 'g_object_unref: assertion 'G_IS_OBJECT (object)' failed'
-    // when the file comes from the terminal.
+
     g_object_unref(file);
 }
 

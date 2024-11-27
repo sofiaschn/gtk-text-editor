@@ -14,7 +14,7 @@ static int onOpen(GApplication *app, GFile **files, int fileCount) {
         exit(EXIT_FAILURE);
     }
 
-    file = g_file_dup( files[0] );
+    file = g_object_ref( files[0] );
     g_application_activate(app);
 
     return EXIT_SUCCESS;
